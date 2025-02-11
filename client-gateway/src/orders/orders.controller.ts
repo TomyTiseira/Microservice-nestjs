@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Param, Inject } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { ORDER_SERVICE } from 'src/config';
 import { catchError } from 'rxjs';
+import { CreateOrderDto } from './dto';
 
 @Controller('orders')
 export class OrdersController {
