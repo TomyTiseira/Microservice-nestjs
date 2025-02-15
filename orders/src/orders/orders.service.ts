@@ -4,14 +4,15 @@ import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { OrderPaginationDto } from './dto/order-pagination.dto';
 import { changeOrderStatusDto } from './dto';
-import { PRODUCTS_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { firstValueFrom } from 'rxjs';
 import { mergeItems } from 'src/common/order.utils';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   constructor(
-    @Inject(PRODUCTS_SERVICE) private readonly productsService: ClientProxy,
+    // @Inject(PRODUCTS_SERVICE) private readonly productsService: ClientProxy,
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) {
     super();
   }
@@ -28,7 +29,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       // Confirmar los ids de los productos
       const productIds = createOrderDto.items.map(item => item.productId);
       const products = await firstValueFrom(
-        this.productsService.send({ cmd: 'validate_products' }, productIds)
+        this.client.send({ cmd: 'validate_products' }, productIds)
       );
 
       // Ordenes fusionadas por id de productos
@@ -142,7 +143,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
       const productIds = order.orderItems.map(item => item.productId);
       const products = await firstValueFrom(
-        this.productsService.send({ cmd: 'validate_products' }, productIds)
+        this.client.send({ cmd: 'validate_products' }, productIds)
       );
 
       // Crear un mapa de productos por ID
