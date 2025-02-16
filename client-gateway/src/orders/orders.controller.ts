@@ -4,6 +4,7 @@ import { NATS_SERVICE, ORDER_SERVICE } from 'src/config';
 import { catchError } from 'rxjs';
 import { CreateOrderDto, OrderStatusDto } from './dto';
 import { PaginationDto } from 'src/common';
+import { changeOrderStatusDto } from './dto/change-order-status.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -48,8 +49,11 @@ export class OrdersController {
   @Patch(':id')
   changeStatus(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() statusDto: OrderStatusDto
+    @Body() changeOrderStatusDto: changeOrderStatusDto
   ) {
-    return this.client.send('changeOrderStatus', { id, status: statusDto.status });
+    return this.client.send('changeOrderStatus', { id, action: changeOrderStatusDto.action })
+      .pipe(
+        catchError(error => { throw new RpcException(error) })
+      )
   }
 }
