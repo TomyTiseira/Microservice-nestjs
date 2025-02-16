@@ -6,13 +6,16 @@ import { OrderPaginationDto } from './dto/order-pagination.dto';
 import { changeOrderStatusDto } from './dto';
 import { NATS_SERVICE } from 'src/config';
 import { firstValueFrom } from 'rxjs';
-import { mergeItems } from 'src/common/order.utils';
+import { mergeItems, OrderStates } from 'src/common';
+import { StatusService } from 'src/status/status.service';
+import { OrderState, PendingState, CancelledState, ConfirmedState, PaidState } from 'src/status/states';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   constructor(
     // @Inject(PRODUCTS_SERVICE) private readonly productsService: ClientProxy,
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
+    private readonly statusService: StatusService,
   ) {
     super();
   }
@@ -45,11 +48,15 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         return acc + orderItem.quantity;
       }, 0);
 
+      // Buscar el estado de la orden
+      const orderState = await this.statusService.getStatusByName(OrderStates.PENDING);
+
       // Crear el pedido
       const order = await this.order.create({
         data: {
           totalAmount,
           totalItems,
+          statusId: orderState.id,
           orderItems: {
             createMany: {
               data: mergedItems.map(item => (
@@ -67,6 +74,12 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
             select: {
               productId: true,
               quantity: true,
+            }
+          }, 
+          status: {
+            select: {
+              id: true,
+              name: true,
             }
           }
         }
@@ -92,9 +105,12 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   }
 
   async findAll(orderPaginationDto: OrderPaginationDto) {
+    // Recuperar el estado del orderPaginationDto
+    const status = await this.statusService.getStatusByName(orderPaginationDto.status);
+
     const totalOrders = await this.order.count({
       where: {
-        status: orderPaginationDto.status,
+        statusId: status.id,
       },
     });
 
@@ -104,7 +120,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
     const data = await this.order.findMany({
       where: {
-        status: orderPaginationDto.status,
+        statusId: status.id,
       },
       skip: perPage * (currentPage - 1),
       take: perPage,
@@ -130,7 +146,8 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
               productId: true,
               quantity: true,
             }
-          }
+          },
+          status: true,
         }
       });
   
@@ -169,15 +186,36 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   }
 
   async changeOrderStatus(changeOrderStatusDto: changeOrderStatusDto) {
-    const { id, status } = changeOrderStatusDto;
+    const { id, action } = changeOrderStatusDto;
 
     const order = await this.findOne(id);
 
-    if(order.status === status) return order;
+    const state = this.getStatusInstance(order.status.name);
+
+    let newStatus: OrderState | undefined;
+    try {
+      newStatus = state[action]();
+    } catch (error) {
+      throw new RpcException({ message: error.message, status: HttpStatus.BAD_REQUEST });
+    }
+
+
+    const newStatusRecord = await this.statusService.getStatusByName(newStatus.getName());
 
     return this.order.update({
-      where: { id },
-      data: { status },
-    })
+      where: {id: order.id},
+      data: { statusId: newStatusRecord.id }
+    });
+  }
+
+  private getStatusInstance(state: string): OrderState {
+    switch (state) {
+      case OrderStates.PENDING: return new PendingState();
+      case OrderStates.CANCELLED: return new CancelledState();
+      case OrderStates.CONFIRMED: return new ConfirmedState();
+      case OrderStates.PAID: return new PaidState();
+      default:
+        throw new RpcException({ message: 'Invalid State', status: HttpStatus.BAD_REQUEST });
+    }
   }
 }
