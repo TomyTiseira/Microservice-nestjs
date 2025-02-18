@@ -54,4 +54,9 @@ export class OrdersController {
         catchError(error => { throw new RpcException(error) })
       )
   }
+
+  @Get('info/states')
+  findAllOrderStates() {
+    return this.client.send('findAllStatus', {});    
+  }
 }
