@@ -16,7 +16,6 @@ services:
       - PORT=${CLIENT_GATEWAT_PORT}
       - NATS_SERVERS=nats://nats-server:4222
 
-
   products:
     build: ./products
     volumes:
@@ -27,20 +26,16 @@ services:
       - NATS_SERVERS=nats://nats-server:4222
       - DATABASE_URL=${PRODUCTS_DATABASE_URL}
 
-
   orders-db:
     container_name: orders_database
     image: postgres:16.2
     restart: always
     volumes:
       - ./orders/postgres:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
     environment:
       - POSTGRES_USER=${ORDERS_DB_USER}
       - POSTGRES_PASSWORD=${ORDERS_DB_PASSWORD}
       - POSTGRES_DB=${ORDERS_POSTGRES_DB}
-
 
   orders:
     depends_on:
