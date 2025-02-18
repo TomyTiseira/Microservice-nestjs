@@ -2,13 +2,12 @@ import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common';
-import { NATS_SERVICE, PRODUCT_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { CreateProductDto, UpdateProductDto } from './dto';
 
 @Controller('products')
 export class ProductsController {
   constructor(
-    // @Inject(PRODUCT_SERVICE) private readonly productService: ClientProxy,
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) {}
 

@@ -1,9 +1,7 @@
 import { HttpStatus, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
 import { PrismaClient } from '@prisma/client';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { OrderPaginationDto } from './dto/order-pagination.dto';
-import { changeOrderStatusDto } from './dto';
+import { changeOrderStatusDto, OrderPaginationDto, CreateOrderDto } from './dto';
 import { NATS_SERVICE } from 'src/config';
 import { firstValueFrom } from 'rxjs';
 import { mergeItems, OrderStates } from 'src/common';
@@ -13,7 +11,6 @@ import { OrderState, PendingState, CancelledState, ConfirmedState, PaidState } f
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   constructor(
-    // @Inject(PRODUCTS_SERVICE) private readonly productsService: ClientProxy,
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
     private readonly statusService: StatusService,
   ) {
