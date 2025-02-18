@@ -1,5 +1,55 @@
+version: '3'
 services:
   nats-server:
     image: nats:2.10.25-alpine3.21
     ports:
-      - "4222:4222"
+      - "8222:8222"
+
+  client-gateway:
+    build: ./client-gateway
+    ports:
+      - "${CLIENT_GATEWAT_PORT}:${CLIENT_GATEWAT_PORT}"
+    volumes:
+      - ./client-gateway/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=${CLIENT_GATEWAT_PORT}
+      - NATS_SERVERS=nats://nats-server:4222
+
+
+  products:
+    build: ./products
+    volumes:
+      - ./products/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=${PRODUCTS_PORT}
+      - NATS_SERVERS=nats://nats-server:4222
+      - DATABASE_URL=${PRODUCTS_DATABASE_URL}
+
+
+  orders-db:
+    container_name: orders_database
+    image: postgres:16.2
+    restart: always
+    volumes:
+      - ./orders/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${ORDERS_DB_USER}
+      - POSTGRES_PASSWORD=${ORDERS_DB_PASSWORD}
+      - POSTGRES_DB=${ORDERS_POSTGRES_DB}
+
+
+  orders:
+    depends_on:
+      - orders-db
+    build: ./orders
+    volumes:
+      - ./orders/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=${ORDERS_PORT}
+      - DATABASE_URL=${ORDERS_DATABASE_URL}
+      - NATS_SERVERS=nats://nats-server:4222
