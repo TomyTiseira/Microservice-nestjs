@@ -36,6 +36,8 @@ services:
       - POSTGRES_USER=${ORDERS_DB_USER}
       - POSTGRES_PASSWORD=${ORDERS_DB_PASSWORD}
       - POSTGRES_DB=${ORDERS_POSTGRES_DB}
+    ports:
+      - "5432:5432"
 
   orders:
     depends_on:
@@ -48,3 +50,18 @@ services:
       - PORT=${ORDERS_PORT}
       - DATABASE_URL=${ORDERS_DATABASE_URL}
       - NATS_SERVERS=nats://nats-server:4222
+
+  payments:
+    build: ./payments
+    volumes:
+      - ./payments/src:/usr/src/app/src
+    command: npm run start:dev
+    ports:
+      - "${PAYMENTS_PORT}:${PAYMENTS_PORT}"
+    environment:
+      - PORT=${PAYMENTS_PORT}
+      - NATS_SERVERS=nats://nats-server:4222
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
+      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
