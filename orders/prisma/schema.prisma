@@ -14,16 +14,18 @@ datasource db {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  totalAmount Float
-  totalItems  Int
-  statusId    String
-  status      Status      @relation(fields: [statusId], references: [id])
-  paid        Boolean     @default(false)
-  paidAt      DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+  id             String        @id @default(uuid())
+  totalAmount    Float
+  totalItems     Int
+  statusId       String
+  status         Status        @relation(fields: [statusId], references: [id])
+  paid           Boolean       @default(false)
+  stripeChargeId String?
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  orderItems     OrderItem[]
+  orderReceipt   OrderReceipt?
 }
 
 model OrderItem {
@@ -39,4 +41,13 @@ model Status {
   id    String  @id @default(uuid())
   name  String  @unique
   Order Order[]
+}
+
+model OrderReceipt {
+  id         String   @id @default(uuid())
+  orderId    String   @unique
+  Order      Order    @relation(fields: [orderId], references: [id])
+  receiptUrl String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
