@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { mergeItems, OrderStates } from 'src/common';
 import { StatusService } from 'src/status/status.service';
 import { OrderState, PendingState, CancelledState, ConfirmedState, PaidState } from 'src/status/states';
+import { OrderWithProducts } from 'src/interfaces/order-with-products.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -71,6 +72,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
             select: {
               productId: true,
               quantity: true,
+              price: true,
             }
           }, 
           status: {
@@ -80,15 +82,19 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
             }
           }
         }
-      })
-
-      return {
-        ...order,
-        orderItems: order.orderItems.map((orderItem) => ({
-          ...orderItem,
-          name: products.find(product => product.id === orderItem.productId).name,
-        }))
       }
+    )
+
+    const { statusId, ...orderWithoutStatusId } = order; // 👈 Quita `statusId`
+
+    return {
+      ...orderWithoutStatusId,
+      orderItems: order.orderItems.map((orderItem) => ({
+        ...orderItem,
+        productName: products.find(product => product.id === orderItem.productId).name,
+      })),
+    } as OrderWithProducts;
+
     } catch (error) {
       this.logger.error(error)
 
@@ -203,6 +209,22 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       where: {id: order.id},
       data: { statusId: newStatusRecord.id }
     });
+  }
+
+  async createPaymentSession(order: OrderWithProducts) {
+    const paymentSession = await firstValueFrom(
+      this.client.send('create_payment_session', {
+        orderId: order.id,
+        currency: 'usd',
+        items: order.orderItems.map(item => ({
+          name: item.productName,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      })
+    );
+
+    return paymentSession;
   }
 
   private getStatusInstance(state: string): OrderState {
