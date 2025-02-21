@@ -8,7 +8,7 @@ import { Request, Response } from 'express';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @MessagePattern('create-payment-session')
+  @MessagePattern('create_payment_session')
   createPaymentSession(@Body() paymentSessionDto: PaymentSessionDto) {
     return this.paymentsService.createPaymentSession(paymentSessionDto)
   }
