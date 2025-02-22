@@ -1,34 +1,24 @@
 # Microservicio de Productos
 
-Este microservicio está diseñado para manejar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) para productos. Utiliza NestJS y Prisma para la gestión de la base de datos.
+Este microservicio se encarga de gestionar la información de los productos en la aplicación. Proporciona funcionalidades para crear, actualizar, eliminar y consultar productos.
 
-## Uso en Modo Desarrollo
+## Funcionalidades
 
-Para ejecutar este microservicio en modo desarrollo, sigue estos pasos:
-
-1. **Clona el repositorio**:
-
-   ```bash
-   git clone <URL del repositorio>
-   cd products
-   ```
-
-2. **Instala las dependencias**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Configura las variables de entorno**:
-   Crea un archivo `.env` basado en el archivo `.env.template` y configura las variables necesarias.
-
-4. **Ejecuta el microservicio**:
-   ```bash
-   npm run start:dev
-   ```
+- **Crear producto**: Permite a los usuarios crear nuevos productos en la base de datos.
+- **Consultar productos**: Permite obtener una lista de productos, con soporte para paginación.
+- **Actualizar producto**: Permite actualizar la información de un producto existente.
+- **Eliminar producto**: Permite marcar un producto como no disponible en lugar de eliminarlo físicamente.
+- **Validar productos**: Verifica la disponibilidad de múltiples productos.
 
 ## Tecnologías Utilizadas
 
-- Node.js
-- NestJS
-- Prisma
+- **NestJS**: Framework para construir aplicaciones del lado del servidor en Node.js.
+- **Prisma**: ORM (Object-Relational Mapping) para interactuar con la base de datos.
+- **TypeScript**: Lenguaje de programación que se compila a JavaScript.
+- **SQLite**: Base de datos SQL.
+
+## Configuración
+
+Asegúrate de configurar las variables de entorno necesarias en el archivo `.env` para que el microservicio funcione correctamente.
+
+- `DATABASE_URL`: URL de conexión a la base de datos.
