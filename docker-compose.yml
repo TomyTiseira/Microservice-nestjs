@@ -1,4 +1,3 @@
-version: '3'
 services:
   nats-server:
     image: nats:2.10.25-alpine3.21
@@ -65,3 +64,14 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
       - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
+
+  auth: 
+    build: ./auth
+    volumes:
+      - ./auth/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=${AUTH_PORT}
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+      - NATS_SERVERS=nats://nats-server:4222
+      - JWT_SECRET=${JWT_SECRET}
