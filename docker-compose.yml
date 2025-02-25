@@ -15,7 +15,6 @@ services:
       - PORT=${CLIENT_GATEWAT_PORT}
       - NATS_SERVERS=nats://nats-server:4222
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
 
   products:
     build: ./products

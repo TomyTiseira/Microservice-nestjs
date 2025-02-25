@@ -6,7 +6,6 @@ interface EnvVars {
   NATS_SERVERS: string[];
   NODE_ENV: string;
   JWT_SECRET: string;
-  JWT_REFRESH_SECRET: string;
 }
 
 const envSchema = joi.object({
@@ -14,7 +13,6 @@ const envSchema = joi.object({
   NATS_SERVERS: joi.array().items(joi.string()).required(),
   NODE_ENV: joi.string().valid('development', 'production', 'test').default('development'),
   JWT_SECRET: joi.string().required(),
-  JWT_REFRESH_SECRET: joi.string().required(),
 })
 .unknown(true);
 
@@ -34,5 +32,4 @@ export const envs = {
   natsServers: envVars.NATS_SERVERS,
   nodeEnv: envVars.NODE_ENV,
   jwtSecret: envVars.JWT_SECRET,
-  jwtRefreshSecret: envVars.JWT_REFRESH_SECRET,
 }
