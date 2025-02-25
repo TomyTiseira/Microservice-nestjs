@@ -4,10 +4,10 @@ Este proyecto es una arquitectura de microservicios que permite gestionar difere
 
 ## Microservicios Incluidos
 
-- [Microservicio de Órdenes](orders/README.md): Gestiona la creación, actualización y recuperación de órdenes, y utiliza el microservicio de pagos para gestionar los pagos.
-- [Microservicio de Autenticación](auth/README.md): Maneja el registro de usuarios, inicio de sesión y validación de tokens.
-- [Microservicio de Pagos](payments/README.md): Se encarga del procesamiento de pagos y manejo de webhooks. Sin embargo, no tiene endpoints expuestos directamente, ya que se utiliza internamente por el microservicio de órdenes para gestionar los pagos.
-- [Microservicio de Productos](products/README.md): Gestiona la creación, actualización y recuperación de productos.
+- [Microservicio de Órdenes](./orders/): Gestiona la creación, actualización y recuperación de órdenes, y utiliza el microservicio de pagos para gestionar los pagos.
+- [Microservicio de Autenticación](./auth/): Maneja el registro de usuarios, inicio de sesión y validación de tokens.
+- [Microservicio de Pagos](./payments/): Se encarga del procesamiento de pagos y manejo de webhooks. Sin embargo, no tiene endpoints expuestos directamente, ya que se utiliza internamente por el microservicio de órdenes para gestionar los pagos.
+- [Microservicio de Productos](./products/): Gestiona la creación, actualización y recuperación de productos.
 
 ## Configuración del Proyecto
 
@@ -40,6 +40,7 @@ Esto construirá y levantará todos los microservicios definidos en el archivo `
 - **TypeScript**: Lenguaje de programación que se compila a JavaScript.
 - **PostgreSQL**: Sistema de gestión de bases de datos utilizado por el microservicio de órdenes.
 - **Stripe**: API para gestionar pagos en línea en el microservicio de pagos.
+- **Docker**: Plataforma para desarrollar, enviar y ejecutar aplicaciones en contenedores.
 
 ## Rutas del Proyecto
 
