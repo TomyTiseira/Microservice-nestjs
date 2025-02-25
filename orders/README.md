@@ -2,36 +2,21 @@
 
 Este microservicio se encarga de gestionar las órdenes en la aplicación. Proporciona funcionalidades para crear, actualizar y obtener información sobre las órdenes.
 
-## Instalación
+## Funcionalidades
 
-Para instalar y ejecutar este microservicio, sigue los siguientes pasos:
+- **Crear orden**: Permite a los usuarios crear una nueva orden en la aplicación.
+- **Actualizar orden**: Permite a los usuarios actualizar la información de una orden existente.
+- **Obtener información de órdenes**: Proporciona endpoints para recuperar información sobre las órdenes.
 
-1. Clona el repositorio:
-   ```bash
-   git clone <URL del repositorio>
-   ```
+## Tecnologías Utilizadas
 
-2. Navega al directorio del microservicio:
-   ```bash
-   cd orders
-   ```
+- **NestJS**: Framework para construir aplicaciones del lado del servidor en Node.js.
+- **PostgreSQL**: Sistema de gestión de bases de datos relacional utilizado para almacenar información de órdenes.
+- **Prisma**: ORM (Object-Relational Mapping) para interactuar con la base de datos.
+- **TypeScript**: Lenguaje de programación que se compila a JavaScript.
 
-3. Instala las dependencias:
-   ```bash
-   npm install
-   ```
+## Configuración
 
-4. Configura las variables de entorno necesarias. Puedes crear un archivo `.env` en la raíz del proyecto y definir las variables requeridas.
+Asegúrate de configurar las variables de entorno necesarias en el archivo `.env` para que el microservicio funcione correctamente.
 
-5. Ejecuta el microservicio:
-   ```bash
-   npm run start:dev
-   ```
-
-## Uso
-
-Una vez que el microservicio esté en funcionamiento, puedes interactuar con él a través de las siguientes rutas:
-
-- `POST /orders`: Crear una nueva orden.
-- `GET /orders`: Obtener todas las órdenes.
-- `GET /orders/:id`: Obtener una orden específica por ID.
+- `DATABASE_URL`: URL de conexión a la base de datos PostgreSQL.
