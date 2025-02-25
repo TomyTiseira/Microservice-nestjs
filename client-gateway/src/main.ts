@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { envs } from 'src/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { RpcCustomExceptionFilter } from './common';
+import * as cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const logger = new Logger('Main-Gateway');
@@ -18,6 +19,8 @@ async function bootstrap() {
   )
 
   app.useGlobalFilters(new RpcCustomExceptionFilter);
+
+  app.use(cookieParser());
 
   await app.listen(envs.port);
 
