@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
 import { JwtPayload } from './interfaces/jwt-payload';
 import * as bcrypt from 'bcrypt';
+import { envs } from 'src/config';
 
 @Injectable()
 export class AuthService {
@@ -15,12 +16,48 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signJWT (payload: JwtPayload) {
+  private async signJWT (payload: JwtPayload) {
     return this.jwtService.sign(payload);
   }
 
+  private async singJWTRefresh (payload: JwtPayload) {
+    return this.jwtService.sign(payload, { 
+      secret: envs.jwtRefreshSecret,
+      expiresIn: '7d'
+     });
+  }
+
   async verifyJWT (token: string) {
-    return this.jwtService.verify(token);
+    try {
+      const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
+        secret: envs.jwtSecret,
+      });
+
+      return {
+        user,
+        token: await this.signJWT(user)
+      }
+    } catch (error) {
+      throw new RpcException({
+        message: 'Invalid token',
+        status: HttpStatus.UNAUTHORIZED
+      });
+    }
+  }
+
+  private async verifyRefreshToken(token: string) {
+    try {
+      const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
+        secret: envs.jwtRefreshSecret,
+      });
+
+      return user      
+    } catch (error) {
+      throw new RpcException({
+        message: 'Invalid refresh token',
+        status: HttpStatus.UNAUTHORIZED
+      });
+    }
   }
 
   async registerUser (registerUserDto: RegisterDto) {
@@ -93,7 +130,8 @@ export class AuthService {
 
       return {
         user: result,
-        token: await this.signJWT(result)
+        accessToken: await this.signJWT(result),
+        refreshToken: await this.singJWTRefresh(result)
       }
 
     } catch (error) {
@@ -101,6 +139,16 @@ export class AuthService {
         message: error.message,
         status: HttpStatus.BAD_REQUEST
       })
+    }
+  }
+
+  async refresh(refreshToken: string) {
+    const payload = await this.verifyRefreshToken(refreshToken);
+
+    const newAccessToken = await this.signJWT(payload)
+
+    return {
+      accessToken: newAccessToken
     }
   }
 }

@@ -3,7 +3,6 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
 
-
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -16,5 +15,10 @@ export class AuthController {
   @MessagePattern('login')
   async login(@Payload() loginUserDto: LoginDto) {
     return this.authService.loginUser(loginUserDto);
+  }
+
+  @MessagePattern('refresh')
+  async refresh(@Payload() refreshToken: string) {
+    return this.authService.refresh(refreshToken);
   }
 }

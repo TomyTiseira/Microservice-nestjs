@@ -17,7 +17,7 @@ import { User, UserSchema } from 'src/mongoose/schemas/user.schema';
     JwtModule.register({
       global: true,
       secret: envs.jwtSecret,
-      signOptions: { expiresIn: '2h' },
+      signOptions: { expiresIn: '1h' },
     })
   ]
 })
