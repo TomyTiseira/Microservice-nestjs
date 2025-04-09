@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Body, Controller, Inject, Post, Res, UseGuards } from '@nestjs/common';
 import { envs, NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -11,23 +13,27 @@ import { JwtAuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
-  ) {}
-  
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
+
   @Post('register')
   register(@Body() registerUserDto: RegisterUserDto) {
-    return this.client.send('register', registerUserDto)
-      .pipe(
-        catchError(error => { throw new RpcException(error) })
-      );
+    return this.client.send('register', registerUserDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Post('login')
   async login(@Body() loginDto: LoginUserDto, @Res() res: Response) {
+    interface LoginResponse {
+      accessToken: string;
+      refreshToken: string;
+      user: CurrentUser;
+    }
 
-    const response = await firstValueFrom(
-      this.client.send('login', loginDto)
+    const response: LoginResponse = await firstValueFrom(
+      this.client.send('login', loginDto),
     );
 
     res.cookie('authToken', response.accessToken, {
@@ -66,8 +72,12 @@ export class AuthController {
 
   @Post('refresh')
   async refresh(@RefreshToken() refreshToken: string, @Res() res: Response) {
-    const response = await firstValueFrom(
-      this.client.send('refresh', refreshToken)
+    interface RefreshResponse {
+      accessToken: string;
+    }
+
+    const response: RefreshResponse = await firstValueFrom(
+      this.client.send('refresh', refreshToken),
     );
 
     res.cookie('authToken', response.accessToken, {

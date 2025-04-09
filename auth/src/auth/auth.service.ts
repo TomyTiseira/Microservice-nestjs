@@ -16,57 +16,57 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private async signJWT (payload: JwtPayload) {
+  private signJWT(payload: JwtPayload) {
     return this.jwtService.sign(payload);
   }
 
-  private async singJWTRefresh (payload: JwtPayload) {
-    return this.jwtService.sign(payload, { 
+  private singJWTRefresh(payload: JwtPayload) {
+    return this.jwtService.sign(payload, {
       secret: envs.jwtRefreshSecret,
-      expiresIn: '7d'
-     });
+      expiresIn: '7d',
+    });
   }
 
-  async verifyJWT (token: string) {
+  verifyJWT(token: string) {
     try {
-      const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
+      const user = this.jwtService.verify<JwtPayload>(token, {
         secret: envs.jwtSecret,
       });
 
       return {
         user,
-        token: await this.signJWT(user)
-      }
-    } catch (error) {
+        token: this.signJWT(user),
+      };
+    } catch {
       throw new RpcException({
         message: 'Invalid token',
-        status: HttpStatus.UNAUTHORIZED
+        status: HttpStatus.UNAUTHORIZED,
       });
     }
   }
 
-  private async verifyRefreshToken(token: string) {
+  private verifyRefreshToken(token: string) {
     try {
-      const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
+      const { ...user } = this.jwtService.verify<JwtPayload>(token, {
         secret: envs.jwtRefreshSecret,
       });
 
-      return user      
-    } catch (error) {
+      return user;
+    } catch {
       throw new RpcException({
         message: 'Invalid refresh token',
-        status: HttpStatus.UNAUTHORIZED
+        status: HttpStatus.UNAUTHORIZED,
       });
     }
   }
 
-  async registerUser (registerUserDto: RegisterDto) {
-    const { email, name, password } = registerUserDto;
+  async registerUser(registerUserDto: RegisterDto) {
+    const { email, name, password: plainPassword } = registerUserDto;
 
-    if (!email || !name || !password) {
+    if (!email || !name || !plainPassword) {
       throw new RpcException({
         message: 'All fields are required',
-        status: HttpStatus.BAD_REQUEST
+        status: HttpStatus.BAD_REQUEST,
       });
     }
 
@@ -76,43 +76,48 @@ export class AuthService {
       if (user) {
         throw new RpcException({
           message: 'User already exists',
-          status: HttpStatus.BAD_REQUEST
+          status: HttpStatus.BAD_REQUEST,
         });
       }
+
+      const hashedPassword = bcrypt.hashSync(String(plainPassword), 10);
 
       const newUser = new this.userModel({
         email,
         name,
-        password: bcrypt.hashSync(password, 10)
+        password: hashedPassword,
       });
-      
+
       await newUser.save();
 
       const newUserDocument = newUser.toObject();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...result } = newUserDocument;
 
       return {
         user: result,
-        token: await this.signJWT(result)
-      }
-    } catch (error) {
+        token: this.signJWT(result),
+      };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       throw new RpcException({
-        message: error.message,
-        status: HttpStatus.BAD_REQUEST
-      })
+        message: errorMessage,
+        status: HttpStatus.BAD_REQUEST,
+      });
     }
   }
 
   async loginUser(loginUserDto: LoginDto) {
     const { email, password } = loginUserDto;
-    
+
     try {
       const user = await this.userModel.findOne({ email }).exec();
 
       if (!user) {
         throw new RpcException({
           message: 'User not found',
-          status: HttpStatus.NOT_FOUND
+          status: HttpStatus.NOT_FOUND,
         });
       }
 
@@ -121,34 +126,35 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new RpcException({
           message: 'Invalid password',
-          status: HttpStatus.UNAUTHORIZED
+          status: HttpStatus.UNAUTHORIZED,
         });
       }
 
       const userDocument = user.toObject();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...result } = userDocument;
 
       return {
         user: result,
-        accessToken: await this.signJWT(result),
-        refreshToken: await this.singJWTRefresh(result)
-      }
-
+        accessToken: this.signJWT(result),
+        refreshToken: this.singJWTRefresh(result),
+      };
     } catch (error) {
       throw new RpcException({
-        message: error.message,
-        status: HttpStatus.BAD_REQUEST
-      })
+        message:
+          error instanceof Error ? error.message : 'An unknown error occurred',
+        status: HttpStatus.BAD_REQUEST,
+      });
     }
   }
 
-  async refresh(refreshToken: string) {
-    const payload = await this.verifyRefreshToken(refreshToken);
+  refresh(refreshToken: string) {
+    const payload = this.verifyRefreshToken(refreshToken);
 
-    const newAccessToken = await this.signJWT(payload)
+    const newAccessToken = this.signJWT(payload);
 
     return {
-      accessToken: newAccessToken
-    }
+      accessToken: newAccessToken,
+    };
   }
 }

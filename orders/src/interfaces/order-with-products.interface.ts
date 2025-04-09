@@ -1,4 +1,4 @@
-import { OrderStates } from "src/common";
+import { OrderStates } from 'src/common';
 
 export interface OrderWithProducts {
   orderItems: {
@@ -6,11 +6,11 @@ export interface OrderWithProducts {
     productId: number;
     quantity: number;
     price: number;
-  }[],
+  }[];
   status: {
     id: string;
-    name: OrderStates
-  }
+    name: OrderStates;
+  };
   id: string;
   totalAmount: number;
   totalItems: number;

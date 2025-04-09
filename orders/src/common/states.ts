@@ -8,5 +8,5 @@ export enum OrderStates {
 export enum ActionState {
   CONFIRM = 'confirm',
   CANCEL = 'cancel',
-  PAY = 'pay'
+  PAY = 'pay',
 }

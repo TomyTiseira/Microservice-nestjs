@@ -7,6 +7,6 @@ import { StatusModule } from 'src/status/status.module';
 @Module({
   controllers: [OrdersController],
   providers: [OrdersService],
-  imports: [NatsModule, StatusModule]
+  imports: [NatsModule, StatusModule],
 })
 export class OrdersModule {}

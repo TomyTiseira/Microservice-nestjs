@@ -1,2 +1,2 @@
 export * from './envs';
-export * from './service'
+export * from './service';

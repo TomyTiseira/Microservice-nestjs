@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { envs } from 'src/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { RpcCustomExceptionFilter } from './common';
-import * as cookieParser from 'cookie-parser'
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const logger = new Logger('Main-Gateway');
@@ -16,9 +16,9 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
     }),
-  )
+  );
 
-  app.useGlobalFilters(new RpcCustomExceptionFilter);
+  app.useGlobalFilters(new RpcCustomExceptionFilter());
 
   app.use(cookieParser());
 
@@ -26,4 +26,5 @@ async function bootstrap() {
 
   logger.log(`Gateway is running on: ${await app.getUrl()}`);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

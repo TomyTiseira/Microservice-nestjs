@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import 'dotenv/config';
 import * as joi from 'joi';
 
@@ -6,14 +7,16 @@ interface EnvVars {
   NATS_SERVERS: string[];
 }
 
-const envSchema = joi.object({
-  PORT: joi.number().default(3000),
-  NATS_SERVERS: joi.array().items(joi.string()).required(),
-}).unknown(true);
+const envSchema = joi
+  .object({
+    PORT: joi.number().default(3000),
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
+  })
+  .unknown(true);
 
 const { error, value } = envSchema.validate({
   ...process.env,
-  NATS_SERVERS: process.env.NATS_SERVERS?.split(',')
+  NATS_SERVERS: process.env.NATS_SERVERS?.split(','),
 });
 
 if (error) {
@@ -25,4 +28,4 @@ const envVars: EnvVars = value;
 export const envs = {
   port: envVars.PORT,
   natsServers: envVars.NATS_SERVERS,
-}
+};

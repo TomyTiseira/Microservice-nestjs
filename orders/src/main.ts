@@ -28,4 +28,5 @@ async function bootstrap() {
 
   logger.log(`Microservice running on port: ${envs.port}`);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

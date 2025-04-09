@@ -9,10 +9,10 @@ import { envs, NATS_SERVICE } from 'src/config';
         name: NATS_SERVICE,
         transport: Transport.NATS,
         options: {
-          servers: envs.natsServers
-        }
-      }
-    ])
+          servers: envs.natsServers,
+        },
+      },
+    ]),
   ],
   exports: [
     ClientsModule.register([
@@ -20,10 +20,10 @@ import { envs, NATS_SERVICE } from 'src/config';
         name: NATS_SERVICE,
         transport: Transport.NATS,
         options: {
-          servers: envs.natsServers
-        }
-      }
-    ])
-  ]
+          servers: envs.natsServers,
+        },
+      },
+    ]),
+  ],
 })
 export class NatsModule {}
