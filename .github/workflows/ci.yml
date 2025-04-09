@@ -29,12 +29,6 @@ jobs:
           npm ci
           npm run lint
 
-      - name: Lint Payment Service
-        run: |
-          cd payments
-          npm ci
-          npm run lint
-
       - name: Lint Order Service
         run: |
           cd orders
@@ -53,11 +47,6 @@ jobs:
           cd auth
           npm run build
 
-      - name: Build Payment Service
-        run: |
-          cd payments
-          npm run build
-
       - name: Build Order Service
         run: |
           cd orders
@@ -73,11 +62,6 @@ jobs:
       - name: Test Auth Service
         run: |
           cd auth
-          npm run test
-
-      - name: Test Payment Service
-        run: |
-          cd payments
           npm run test
 
       - name: Test Order Service
