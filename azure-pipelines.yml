@@ -1,136 +1,173 @@
+
+trigger: none
 pr:
   branches:
     include:
-      - develop  # Solo se activa para PRs hacia develop
+      - develop
 
-trigger: none  # No trigger automático en push (solo PR)
+variables:
+  DOCKER_BUILDKIT: 1
+  NESTJS_VERSION: '14'
 
 stages:
-  # --- STAGE 1: Detección de cambios (optimizado para microservicios) ---
-  - stage: DetectChanges
-    displayName: "🔍 Detectar cambios"
-    jobs:
-      - job: DetectChangesJob
-        pool: 
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: self
-            fetchDepth: 2  # Solo necesitamos el commit actual y el anterior
+# STAGE 1: LINTING
+- stage: Lint
+  displayName: 'Lint Microservices'
+  jobs:
+  - job: Lint_AuthService
+    displayName: 'Lint Auth Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+    - script: npm install -g @nestjs/cli
+    - checkout: self
+    - script: |
+        cd auth
+        npm ci
+        npm run lint
+      displayName: 'Run Lint for Auth Service'
 
-          - script: |
-              # Usamos variables de Azure para PRs
-              if [ -n "$SYSTEM_PULLREQUEST_TARGETBRANCH" ]; then
-                BASE=$(git rev-parse origin/$SYSTEM_PULLREQUEST_TARGETBRANCH)
-                CHANGED_FILES=$(git diff --name-only $BASE HEAD)
-              else
-                CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
-              fi
+  - job: Lint_PaymentService
+    displayName: 'Lint Payment Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+    - script: npm install -g @nestjs/cli
+    - checkout: self
+    - script: |
+        cd payments
+        npm ci
+        npm run lint
+      displayName: 'Run Lint for Payment Service'
 
-              echo "=== Archivos modificados ==="
-              echo "$CHANGED_FILES"
+  - job: Lint_OrderService
+    displayName: 'Lint Order Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+    - script: npm install -g @nestjs/cli
+    - checkout: self
+    - script: |
+        cd orders
+        npm ci
+        npm run lint
+      displayName: 'Run Lint for Orders Service'
+  
+  - job: Lint_ProductsService
+    displayName: 'Lint Product Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+    - script: npm install -g @nestjs/cli
+    - checkout: self
+    - script: |
+        cd products
+        npm ci
+        npm run lint
+      displayName: 'Run Lint for Product Service'
+  
+  - job: Lint_GatewayService
+    displayName: 'Lint Gateway Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
+    - script: npm install -g @nestjs/cli
+    - checkout: self
+    - script: |
+        cd client-gateway
+        npm ci
+        npm run lint
+      displayName: 'Run Lint for Gateway Service'
 
-              # Seteamos variables por microservicio
-              echo "##vso[task.setvariable variable=run_lint;output=true]false"
-              echo "##vso[task.setvariable variable=run_test;output=true]false"
-              echo "##vso[task.setvariable variable=run_build;output=true]false"
+# STAGE 2: BUILD
+- stage: Build
+  displayName: 'Build Microservices'
+  dependsOn: Lint
+  condition: succeeded()
+  jobs:
+  - job: Build_AuthService
+    displayName: 'Build Auth Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        cd auth
+        npm run build
+      displayName: 'Build Auth Service'
 
-              # Detectamos cambios en cada microservicio
-              MICROSERVICES=("auth" "orders" "payments" "shared")  # Agrega los tuyos
-              for ms in "${MICROSERVICES[@]}"; do
-                if echo "$CHANGED_FILES" | grep -q "^$ms/"; then
-                  echo "##vso[task.setvariable variable=run_${ms};output=true]true"
-                  echo "##vso[task.setvariable variable=run_lint;output=true]true"
-                  echo "##vso[task.setvariable variable=run_test;output=true]true"
-                  echo "##vso[task.setvariable variable=run_build;output=true]true"
-                fi
-              done
-            env:
-              SYSTEM_PULLREQUEST_TARGETBRANCH: $(System.PullRequest.TargetBranch)
-            displayName: "Determinar microservicios afectados"
+  - job: Build_PaymentService
+    displayName: 'Build Payment Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        cd payments
+        npm run build
+      displayName: 'Build Payment Service'
 
-  # --- STAGE 2: Instalación de dependencias ---
-  - stage: InstallDependencies
-    displayName: "📦 Instalar dependencias"
-    dependsOn: DetectChanges
-    jobs:
-      - job: InstallDeps
-        pool: 
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: self
-          - script: |
-              if [ "$RUN_LINT" == "true" ] || [ "$RUN_TEST" == "true" ] || [ "$RUN_BUILD" == "true" ]; then
-                npm ci  # Instalación limpia de dependencias
-              else
-                echo "No hay cambios que requieran instalación de dependencias."
-              fi
-            displayName: "Instalar dependencias globales"
+  - job: Build_OrderService
+    displayName: 'Build Order Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        cd orders
+        npm run build
+      displayName: 'Build Order Service'
 
-  # --- STAGE 3: Linting y Formatting ---
-  - stage: Lint
-    displayName: "🧹 Linting"
-    dependsOn: InstallDependencies
-    condition: eq(variables['run_lint'], 'true')
-    jobs:
-      - job: LintAll
-        pool: 
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: self
-          - script: |
-              MICROSERVICES=("auth" "orders" "payments")
-              for ms in "${MICROSERVICES[@]}"; do
-                if [ "$(run_${ms})" == "true" ]; then
-                  echo "=== Linting $ms ==="
-                  cd $ms
-                  npm run lint
-                  cd ..
-                fi
-              done
-            displayName: "Ejecutar ESLint"
+# STAGE 3: TEST
+- stage: Test
+  displayName: 'Test Microservices'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Test_AuthService
+    displayName: 'Test Auth Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        cd auth
+        npm run test
+      displayName: 'Test Auth Service'
 
-  # --- STAGE 4: Pruebas Unitarias ---
-  - stage: Test
-    displayName: "🧪 Pruebas unitarias"
-    dependsOn: Lint
-    condition: eq(variables['run_test'], 'true')
-    jobs:
-      - job: TestAll
-        pool: 
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: self
-          - script: |
-              MICROSERVICES=("auth" "orders" "payments")
-              for ms in "${MICROSERVICES[@]}"; do
-                if [ "$(run_${ms})" == "true" ]; then
-                  echo "=== Testing $ms ==="
-                  cd $ms
-                  npm test
-                  cd ..
-                fi
-              done
-            displayName: "Ejecutar pruebas"
+  - job: Test_PaymentService
+    displayName: 'Test Payment Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        cd payments
+        npm run test
+      displayName: 'Test Payment Service'
 
-  # --- STAGE 5: Build ---
-  - stage: Build
-    displayName: "🏗️ Build"
-    dependsOn: Test
-    condition: eq(variables['run_build'], 'true')
-    jobs:
-      - job: BuildAll
-        pool: 
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: self
-          - script: |
-              MICROSERVICES=("auth" "orders" "payments")
-              for ms in "${MICROSERVICES[@]}"; do
-                if [ "$(run_${ms})" == "true" ]; then
-                  echo "=== Building $ms ==="
-                  cd $ms
-                  npm run build
-                  cd ..
-                fi
-              done
-            displayName: "Compilar microservicios"
+  - job: Test_OrderService
+    displayName: 'Test User Service'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - script: |
+        cd orders
+        npm run test
+      displayName: 'Test Order Service'
