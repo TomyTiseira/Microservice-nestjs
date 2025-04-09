@@ -3,8 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { envs } from 'src/config';
 
 @Module({
-  imports: [
-    MongooseModule.forRoot(envs.databaseUrl)
-  ]
+  imports: [MongooseModule.forRoot(envs.databaseUrl)],
 })
-export class MongooseConfigModule  {}
+export class MongooseConfigModule {}

@@ -18,7 +18,7 @@ export class AuthController {
   }
 
   @MessagePattern('refresh')
-  async refresh(@Payload() refreshToken: string) {
+  refresh(@Payload() refreshToken: string) {
     return this.authService.refresh(refreshToken);
   }
 }

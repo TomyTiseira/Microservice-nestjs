@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import 'dotenv/config';
 import * as joi from 'joi';
 
@@ -5,21 +6,23 @@ interface envsVars {
   PORT: number;
   DATABASE_URL: string;
   JWT_SECRET: string;
-  JWT_REFRESH_SECRET: string
+  JWT_REFRESH_SECRET: string;
   NATS_SERVERS: string[];
 }
 
-const envSchema = joi.object({
-  PORT: joi.number().required(),
-  DATABASE_URL: joi.string().required(),
-  JWT_SECRET: joi.string().required(),
-  JWT_REFRESH_SECRET: joi.string().required(),
-  NATS_SERVERS: joi.array().items(joi.string()).required(),
-}).unknown(true);
+const envSchema = joi
+  .object({
+    PORT: joi.number().required(),
+    DATABASE_URL: joi.string().required(),
+    JWT_SECRET: joi.string().required(),
+    JWT_REFRESH_SECRET: joi.string().required(),
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
+  })
+  .unknown(true);
 
 const { error, value } = envSchema.validate({
   ...process.env,
-  NATS_SERVERS: process.env.NATS_SERVERS?.split(',')
+  NATS_SERVERS: process.env.NATS_SERVERS?.split(','),
 });
 
 if (error) {
@@ -34,4 +37,4 @@ export const envs = {
   jwtSecret: envVars.JWT_SECRET,
   jwtRefreshSecret: envVars.JWT_REFRESH_SECRET,
   natsServers: envVars.NATS_SERVERS,
-}
+};

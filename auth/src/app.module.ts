@@ -3,10 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { MongooseConfigModule } from './mongoose/mongoose.module';
 
 @Module({
-  imports: [
-    AuthModule, 
-    MongooseConfigModule
-  ],
+  imports: [AuthModule, MongooseConfigModule],
   controllers: [],
   providers: [],
 })
