@@ -1,0 +1,128 @@
+pr:
+  branches:
+    include:
+      - develop
+trigger: none
+
+stages:
+
+# Stage 0: Detección de cambios
+- stage: DetectarCambios
+  displayName: "Detectar Cambios en Microservicios"
+  jobs:
+    - job: DetectarCambiosJob
+      displayName: "Detectar Cambios"
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+          fetchDepth: 0
+        - script: |
+            # Obtener la lista de archivos modificados en la PR
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+            echo "Archivos modificados: $CHANGED_FILES"
+
+            # Inicializar variables de cambios
+            echo "##vso[task.setvariable variable=auth_changed;]false"
+            echo "##vso[task.setvariable variable=orders_changed;]false"
+            echo "##vso[task.setvariable variable=payments_changed;]false"
+
+            # Verificar si se modificaron archivos en cada microservicio
+            if echo "$CHANGED_FILES" | grep -q '^auth/'; then
+              echo "##vso[task.setvariable variable=auth_changed;]true"
+            fi
+            if echo "$CHANGED_FILES" | grep -q '^orders/'; then
+              echo "##vso[task.setvariable variable=orders_changed;]true"
+            fi
+            if echo "$CHANGED_FILES" | grep -q '^payments/'; then
+              echo "##vso[task.setvariable variable=payments_changed;]true"
+            fi
+          displayName: "Detectar microservicios modificados"
+
+# Stage 1: Análisis del Código (ESLint)
+- stage: AnalisisCodigo
+  displayName: "Análisis de Código con ESLint"
+  dependsOn: DetectarCambios
+  jobs:
+    - job: ESLint_Auth
+      displayName: "ESLint - Auth"
+      condition: eq(variables['auth_changed'], 'true')
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+        - script: |
+            cd auth
+            npm install
+            npm run lint
+          displayName: "Ejecutar ESLint en Auth"
+
+    - job: ESLint_Orders
+      displayName: "ESLint - Orders"
+      condition: eq(variables['orders_changed'], 'true')
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+        - script: |
+            cd orders
+            npm install
+            npm run lint
+          displayName: "Ejecutar ESLint en Orders"
+
+    - job: ESLint_Payments
+      displayName: "ESLint - Payments"
+      condition: eq(variables['payments_changed'], 'true')
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+        - script: |
+            cd payments
+            npm install
+            npm run lint
+          displayName: "Ejecutar ESLint en Payments"
+
+# Stage 2: Build (Compilar aplicaciones)
+- stage: Construccion
+  displayName: "Construcción de Microservicios"
+  dependsOn: AnalisisCodigo
+  jobs:
+    - job: Build_Auth
+      displayName: "Build - Auth"
+      condition: eq(variables['auth_changed'], 'true')
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+        - script: |
+            cd auth
+            npm install
+            npm run build
+          displayName: "Construir Auth"
+
+    - job: Build_Orders
+      displayName: "Build - Orders"
+      condition: eq(variables['orders_changed'], 'true')
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+        - script: |
+            cd orders
+            npm install
+            npm run build
+          displayName: "Construir Orders"
+
+    - job: Build_Payments
+      displayName: "Build - Payments"
+      condition: eq(variables['payments_changed'], 'true')
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+        - script: |
+            cd payments
+            npm install
+            npm run build
+          displayName: "Construir Payments"
