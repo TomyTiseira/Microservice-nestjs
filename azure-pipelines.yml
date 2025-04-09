@@ -32,6 +32,7 @@ stages:
 
   - job: Lint_PaymentService
     displayName: 'Lint Payment Service'
+    dependsOn: Lint_AuthService
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -48,6 +49,7 @@ stages:
 
   - job: Lint_OrderService
     displayName: 'Lint Order Service'
+    dependsOn: Lint_PaymentService
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -61,9 +63,10 @@ stages:
         npm ci
         npm run lint
       displayName: 'Run Lint for Orders Service'
-  
+
   - job: Lint_ProductsService
     displayName: 'Lint Product Service'
+    dependsOn: Lint_OrderService
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -77,9 +80,10 @@ stages:
         npm ci
         npm run lint
       displayName: 'Run Lint for Product Service'
-  
+
   - job: Lint_GatewayService
     displayName: 'Lint Gateway Service'
+    dependsOn: Lint_ProductsService
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -93,6 +97,7 @@ stages:
         npm ci
         npm run lint
       displayName: 'Run Lint for Gateway Service'
+
 
 # STAGE 2: BUILD
 - stage: Build
