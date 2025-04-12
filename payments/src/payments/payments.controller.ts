@@ -10,27 +10,27 @@ export class PaymentsController {
 
   @MessagePattern('create_payment_session')
   createPaymentSession(@Body() paymentSessionDto: PaymentSessionDto) {
-    return this.paymentsService.createPaymentSession(paymentSessionDto)
+    return this.paymentsService.createPaymentSession(paymentSessionDto);
   }
 
   @Get('success')
   success() {
     return {
       ok: true,
-      message: 'Payment successful'
-    }
+      message: 'Payment successful',
+    };
   }
 
   @Get('cancel')
   cancel() {
     return {
       ok: false,
-      message: 'Payment cancelled'
-    }
+      message: 'Payment cancelled',
+    };
   }
 
   @Post('webhook')
-  async stripeWebhook(@Req() req: Request, @Res() res: Response) {
-    return this.paymentsService.stripeWebhook(req, res)
+  stripeWebhook(@Req() req: Request, @Res() res: Response) {
+    return this.paymentsService.stripeWebhook(req, res);
   }
 }

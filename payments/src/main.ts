@@ -12,12 +12,11 @@ async function bootstrap() {
     {
       transport: Transport.NATS,
       options: {
-        servers: envs.natsServers
-      }
-    }
+        servers: envs.natsServers,
+      },
+    },
   );
 
-  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -29,4 +28,5 @@ async function bootstrap() {
 
   logger.log(`Payments-MS is running on: ${envs.port}`);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
