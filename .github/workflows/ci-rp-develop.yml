@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-lint:
     runs-on: ubuntu-latest
+    environment: dev
 
     steps:
       - name: Checkout code
@@ -17,6 +18,21 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "20"
+
+      - name: Set enviroment varibles form secrets
+        run: |
+          echo "AUTH_DATABASE_URL=${{ secrets.AUTH_DATABASE_URL_DEV }}" >> $GITHUB_ENV
+          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET_DEV }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_DATABASE_URL=${{ secrets.ORDERS_DATABASE_URL_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_DB_PASSWORD=${{ secrets.ORDERS_DB_PASSWORD_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_DB_USER=${{ secrets.ORDERS_DB_USER_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_POSTGRES_DB=${{ secrets.ORDERS_POSTGRES_DB_DEV }}" >> $GITHUB_ENV
+          echo "PRODUCTS_DATABASE_URL=${{ secrets.PRODUCTS_DATABASE_URL_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_CANCEL_URL=${{ secrets.STRIPE_CANCEL_URL_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_SUCCESS_URL=${{ secrets.STRIPE_SUCCESS_URL_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET_DEV }}" >> $GITHUB_ENV
 
       - name: Docker compose build
         run: docker compose -f docker-compose.yml build
