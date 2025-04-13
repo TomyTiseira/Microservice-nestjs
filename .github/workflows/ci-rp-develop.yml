@@ -33,7 +33,7 @@ jobs:
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY_DEV }}" >> $GITHUB_ENV
           echo "STRIPE_SUCCESS_URL=${{ secrets.STRIPE_SUCCESS_URL_DEV }}" >> $GITHUB_ENV
           echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET_DEV }}" >> $GITHUB_ENV
-          echo "CLIENT_GATEWAY_PORT=3000" >> $GITHUB_ENV
+          echo "CLIENT_GATEWAT_PORT=3000" >> $GITHUB_ENV
           echo "PRODUCTS_PORT=3001" >> $GITHUB_ENV
           echo "ORDERS_PORT=3002" >> $GITHUB_ENV
           echo "PAYMENTS_PORT=3003" >> $GITHUB_ENV
