@@ -1,0 +1,72 @@
+name: CD - Deploy to Test
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: Copy project files
+        uses: appleboy/scp-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "."
+          target: "/home/${{ secrets.SSH_USER }}/projects/microservice-nestjs"
+          strip_components: 1
+
+      - name: Setup and Deploy
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/projects/microservice-nestjs
+
+            # Clone the repository or pull the latest changes
+            if [ -d ".git" ]; then
+              git pull origin develop
+            else
+              git clone --branch develop https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
+            fi
+
+            # Create .env file
+            unmask 077
+            cat <<ENV > .env
+            AUTH_DATABASE_URL=${{ secrets.AUTH_DATABASE_URL }}
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            ORDERS_DATABASE_URL=${{ secrets.ORDERS_DATABASE_URL }}
+            ORDERS_DB_PASSWORD=${{ secrets.ORDERS_DB_PASSWORD }}
+            ORDERS_DB_USER=${{ secrets.ORDERS_DB_USER }}
+            ORDERS_POSTGRES_DB=${{ secrets.ORDERS_POSTGRES_DB }}
+            PRODUCTS_DATABASE_URL=${{ secrets.PRODUCTS_DATABASE_URL }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+            STRIPE_CANCEL_URL=${{ secrets.STRIPE_CANCEL_URL }}
+            STRIPE_SUCCESS_URL=${{ secrets.STRIPE_SUCCESS_URL }}
+            CLIENT_GATEWAY_PORT=3000
+            PRODUCTS_PORT=3001
+            ORDERS_PORT=3002
+            PAYMENTS_PORT=3003
+            AUTH_PORT=3004
+            ENV
+
+            # Docker
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
