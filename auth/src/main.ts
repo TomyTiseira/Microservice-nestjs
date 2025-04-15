@@ -17,10 +17,11 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-    })
+    }),
   );
 
   await app.listen();
   logger.log(`Auth microservice is running on port: ${envs.port}`);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

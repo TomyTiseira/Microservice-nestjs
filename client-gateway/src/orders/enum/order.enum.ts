@@ -2,11 +2,11 @@ export enum OrderStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
   CANCELLED = 'CANCELLED',
-  PAID = 'PAID'
+  PAID = 'PAID',
 }
 
 export enum ActionState {
   CONFIRM = 'confirm',
   CANCEL = 'cancel',
-  PAY = 'pay'
+  PAY = 'pay',
 }

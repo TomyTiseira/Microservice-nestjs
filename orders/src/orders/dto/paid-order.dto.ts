@@ -1,4 +1,4 @@
-import { IsString, IsUrl, IsUUID, } from "class-validator";
+import { IsString, IsUrl, IsUUID } from 'class-validator';
 
 export class PaidOrderDto {
   @IsString()
@@ -9,5 +9,5 @@ export class PaidOrderDto {
 
   @IsString()
   @IsUrl()
-  receiptUrl: String;
+  receiptUrl: string;
 }

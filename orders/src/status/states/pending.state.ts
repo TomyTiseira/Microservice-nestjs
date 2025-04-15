@@ -1,7 +1,7 @@
-import { OrderStates } from "src/common";
-import { OrderState } from "./order-state.interface";
-import { ConfirmedState } from "./confirmed.state";
-import { CancelledState } from "./cancelled.state";
+import { OrderStates } from 'src/common';
+import { OrderState } from './order-state.interface';
+import { ConfirmedState } from './confirmed.state';
+import { CancelledState } from './cancelled.state';
 
 export class PendingState implements OrderState {
   confirm(): OrderState {
@@ -9,7 +9,7 @@ export class PendingState implements OrderState {
   }
 
   pay(): OrderState {
-    throw new Error("Cannot pay a pending order. Must be confirmed first");
+    throw new Error('Cannot pay a pending order. Must be confirmed first');
   }
 
   cancel(): OrderState {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -23,7 +25,9 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;
 
-    const totalProducts = await this.product.count({where: { available: true }});
+    const totalProducts = await this.product.count({
+      where: { available: true },
+    });
     const lastPage = Math.ceil(totalProducts / limit);
 
     return {
@@ -35,9 +39,9 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       meta: {
         page,
         totalProducts,
-        lastPage
-      }
-    }
+        lastPage,
+      },
+    };
   }
 
   async findOne(id: number) {
@@ -56,8 +60,8 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    const {id: _, ...data} = updateProductDto;
-    
+    const { id: _, ...data } = updateProductDto;
+
     await this.findOne(id);
 
     return this.product.update({
@@ -69,7 +73,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   async remove(id: number) {
     await this.findOne(id);
 
-    return  this.product.update({
+    return this.product.update({
       where: { id },
       data: { available: false },
     });

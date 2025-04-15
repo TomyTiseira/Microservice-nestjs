@@ -1,0 +1,57 @@
+name: CI - PR Develop
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - name: Set enviroment varibles form secrets
+        run: |
+          echo "AUTH_DATABASE_URL=${{ secrets.AUTH_DATABASE_URL_DEV }}" >> $GITHUB_ENV
+          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET_DEV }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_DATABASE_URL=${{ secrets.ORDERS_DATABASE_URL_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_DB_PASSWORD=${{ secrets.ORDERS_DB_PASSWORD_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_DB_USER=${{ secrets.ORDERS_DB_USER_DEV }}" >> $GITHUB_ENV
+          echo "ORDERS_POSTGRES_DB=${{ secrets.ORDERS_POSTGRES_DB_DEV }}" >> $GITHUB_ENV
+          echo "PRODUCTS_DATABASE_URL=${{ secrets.PRODUCTS_DATABASE_URL_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_CANCEL_URL=${{ secrets.STRIPE_CANCEL_URL_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_SUCCESS_URL=${{ secrets.STRIPE_SUCCESS_URL_DEV }}" >> $GITHUB_ENV
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET_DEV }}" >> $GITHUB_ENV
+          echo "CLIENT_GATEWAT_PORT=3000" >> $GITHUB_ENV
+          echo "PRODUCTS_PORT=3001" >> $GITHUB_ENV
+          echo "ORDERS_PORT=3002" >> $GITHUB_ENV
+          echo "PAYMENTS_PORT=3003" >> $GITHUB_ENV
+          echo "AUTH_PORT=3004" >> $GITHUB_ENV
+
+
+      - name: Docker compose build
+        run: docker compose -f docker-compose.yml build
+
+      - name: Start services with Docker Compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: ./docker-compose.yml
+
+      - name: run linter
+        run: |
+          docker compose -f docker-compose.yml run --rm auth npm run lint
+          docker compose -f docker-compose.yml run --rm client-gateway npm run lint
+          docker compose -f docker-compose.yml run --rm orders npm run lint
+          docker compose -f docker-compose.yml run --rm payments npm run lint
+          docker compose -f docker-compose.yml run --rm products npm run lint

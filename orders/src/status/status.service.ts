@@ -14,11 +14,12 @@ export class StatusService extends PrismaClient implements OnModuleInit {
 
   async getStatusByName(name: string) {
     const status = await this.status.findFirst({ where: { name } });
-    
-    if (!status) throw new RpcException({
-      message: 'State not found',
-      status: HttpStatus.NOT_FOUND
-    });
+
+    if (!status)
+      throw new RpcException({
+        message: 'State not found',
+        status: HttpStatus.NOT_FOUND,
+      });
 
     return status;
   }

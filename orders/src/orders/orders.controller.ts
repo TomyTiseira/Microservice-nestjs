@@ -1,7 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Controller } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
-import { changeOrderStatusDto, CreateOrderDto, OrderPaginationDto, PaidOrderDto } from './dto';
+import {
+  changeOrderStatusDto,
+  CreateOrderDto,
+  OrderPaginationDto,
+  PaidOrderDto,
+} from './dto';
 
 @Controller()
 export class OrdersController {
@@ -16,11 +22,11 @@ export class OrdersController {
     return {
       order,
       paymentSession,
-    }
+    };
   }
 
   @EventPattern('payment.succeeded')
-  async handlePaymentConfirmed(@Payload() paidOrderDto: PaidOrderDto) {
+  handlePaymentConfirmed(@Payload() paidOrderDto: PaidOrderDto) {
     console.log('Payment confirmed', paidOrderDto);
     return;
   }

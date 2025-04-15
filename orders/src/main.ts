@@ -8,23 +8,25 @@ async function bootstrap() {
   const logger = new Logger('Main-Orders');
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule, 
+    AppModule,
     {
       transport: Transport.NATS,
       options: {
         servers: envs.natsServers,
-      }
-    }
+      },
+    },
   );
 
   app.useGlobalPipes(
     new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   await app.listen();
 
   logger.log(`Microservice running on port: ${envs.port}`);
 }
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
