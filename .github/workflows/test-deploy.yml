@@ -33,6 +33,8 @@ jobs:
           script: |
             cd /home/${{ secrets.SSH_USER }}/projects/microservice-nestjs
 
+            # Cambio para probar PR
+
             # Clone the repository or pull the latest changes
             if [ -d ".git" ]; then
               git pull origin develop
