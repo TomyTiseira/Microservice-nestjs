@@ -12,18 +12,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up SSH key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
-
-      - name: Validate SSH key
-        run: ssh-keygen -l -f key.pem
-
-      - name: Test SSH connection
-        run: ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
-
+        
       - name: Copy project files
         uses: appleboy/scp-action@v0.1.7
         with:
