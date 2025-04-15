@@ -31,7 +31,7 @@ jobs:
           strip_components: 1
 
       - name: Setup and Deploy
-        uses: appleboy/ssh-action@v0-1.10
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
