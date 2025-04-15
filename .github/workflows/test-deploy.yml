@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up SSH key
         run: |
@@ -19,7 +19,7 @@ jobs:
           chmod 600 key.pem
 
       - name: Copy project files
-        uses: appleboy/scp-action@v1.2.2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -45,7 +45,7 @@ jobs:
             fi
 
             # Create .env file
-            unmask 077
+            umask 077
             cat <<ENV > .env
             AUTH_DATABASE_URL=${{ secrets.AUTH_DATABASE_URL }}
             JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
