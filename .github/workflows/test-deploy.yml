@@ -8,11 +8,18 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: test
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
+      - name: check
+        run: |
+          echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
+          echo "SSH_USER: ${{ secrets.SSH_USER }}"
+          echo "SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}"
+
       - name: Copy project files
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -24,7 +31,7 @@ jobs:
           strip_components: 1
 
       - name: Setup and Deploy
-        uses: appleboy/ssh-action@v1.2.2
+        uses: appleboy/ssh-action@v0-1.10
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
